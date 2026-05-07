@@ -1,0 +1,14 @@
+{
+    "7279232732": {
+        "dispositivos": "2",
+        "metodo_pago": "crypto",
+        "fecha_compra": "2026-05-07 19:37",
+        "esperando_usuario": true,
+        "esperando_enlace": true
+    },
+    "6933982728": {
+        "dispositivos": "1",
+        "esperando_usuario": false,
+        "esperando_enlace": true
+    }
+}
