@@ -1,6 +1,5 @@
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from datetime import datetime
 import json
 import os
 
@@ -39,8 +38,10 @@ def save_db(db):
 
 def update_user(user_id, data):
     db = load_db()
+
     if str(user_id) not in db:
         db[str(user_id)] = {}
+
     db[str(user_id)].update(data)
     save_db(db)
 
@@ -49,13 +50,15 @@ def get_user(user_id):
     return db.get(str(user_id), {})
 
 # ---------------------------------------------------
-# KEYBOARD
+# HELPERS
 # ---------------------------------------------------
 
 def kb(buttons):
     markup = InlineKeyboardMarkup()
+
     for row in buttons:
         markup.row(*row)
+
     return markup
 
 def notify_admin(text):
@@ -70,11 +73,13 @@ def notify_admin(text):
 
 @bot.message_handler(commands=['start'])
 def start(message):
+
     chat_id = message.chat.id
 
     bot.send_message(
         chat_id,
-        "👋 <b>Bienvenido</b>\n\n¿Eres un cliente nuevo o ya eres cliente?",
+        "👋 <b>Bienvenido</b>\n\n"
+        "¿Eres un cliente nuevo o ya eres cliente?",
         reply_markup=kb([
             [InlineKeyboardButton("🆕 Nuevo cliente", callback_data="nuevo_cliente")],
             [InlineKeyboardButton("👤 Ya soy cliente", callback_data="antiguo_cliente")]
@@ -82,14 +87,19 @@ def start(message):
     )
 
 # ---------------------------------------------------
-# RESPUESTA AUTOMÁTICA (ANTES DE START / SOLO 1 VEZ)
+# AUTO RESPUESTA SOLO 1 VEZ
 # ---------------------------------------------------
 
 @bot.message_handler(func=lambda m: True)
 def auto_respuesta(message):
+
     user_id = message.chat.id
 
-    # si ya fue atendido, no hacer nada
+    # Ignorar grupos
+    if message.chat.type != "private":
+        return
+
+    # Solo responder una vez
     if user_id in usuarios_atendidos:
         return
 
@@ -97,105 +107,268 @@ def auto_respuesta(message):
 
     bot.send_message(
         user_id,
-        "Hola, soy Spidez.\n\n"
+        "Hola, soy Spidez 👋\n\n"
         "Puedes hablar con mi asistente aquí 👉 @asispidezbot\n\n"
-        "Si ya eres cliente, escribe /start."
+        "Si ya eres cliente y necesitas ayuda, escribe /start."
     )
 
 # ---------------------------------------------------
-# CALLBACKS (TU BOT ORIGINAL)
+# CALLBACKS
 # ---------------------------------------------------
 
 @bot.callback_query_handler(func=lambda call: True)
 def callbacks(call):
+
+    # quitar loading infinito
+    bot.answer_callback_query(call.id)
+
     data = call.data
     chat_id = call.message.chat.id
+
     user = call.from_user
     user_tag = f"@{user.username}" if user.username else user.first_name
+
+    # ---------------------------------------------------
+    # MENÚ PRINCIPAL
+    # ---------------------------------------------------
 
     if data == "start_menu":
         start(call.message)
         return
 
+    # ---------------------------------------------------
+    # NUEVO CLIENTE
+    # ---------------------------------------------------
+
     if data == "nuevo_cliente":
+
         bot.send_message(
             chat_id,
-            "Perfecto 👌\n\nElige una opción:",
+            "👌 <b>Perfecto</b>\n\n"
+            "Selecciona una opción:",
             reply_markup=kb([
-                [InlineKeyboardButton("ℹ Información y Precios", callback_data="info_precios")],
+                [InlineKeyboardButton("ℹ Información y precios", callback_data="info_precios")],
                 [InlineKeyboardButton("🛒 Adquirir servicio", callback_data="adquirir")],
-                [InlineKeyboardButton("🆘 Ayuda con la instalación", callback_data="ayuda_instalacion")],
-                [InlineKeyboardButton("🎁 Quiero prueba gratis", callback_data="prueba_gratis")],
+                [InlineKeyboardButton("🆘 Ayuda instalación", callback_data="ayuda_instalacion")],
+                [InlineKeyboardButton("🎁 Solicitar prueba gratis", callback_data="prueba_gratis")],
                 [InlineKeyboardButton("💬 Hablar con Spidez", url="https://t.me/manager_spidez")],
                 [InlineKeyboardButton("🔙 Volver atrás", callback_data="start_menu")]
             ])
         )
+
         return
 
-    if data == "antiguo_cliente":
-        bot.send_message(
-            chat_id,
-            "Bienvenido de nuevo 👋\n¿Qué necesitas?",
-            reply_markup=kb([
-                [InlineKeyboardButton("🔄 Renovar", callback_data="renovar")],
-                [InlineKeyboardButton("⚠️ Tengo problemas con mi enlace", callback_data="problema_enlace")],
-                [InlineKeyboardButton("💬 Hablar con Spidez", url="https://t.me/manager_spidez")],
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="start_menu")]
-            ])
-        )
-        return
+    # ---------------------------------------------------
+    # INFORMACIÓN
+    # ---------------------------------------------------
 
     if data == "info_precios":
+
         bot.send_message(
             chat_id,
-            "📌 <b>Información del servicio</b>\n\n"
-            "• Servicio estable 24/7\n"
-            "• Compatible con todos los dispositivos\n"
-            "• Soporte rápido\n\n"
-            "💰 <b>Precios</b>\n"
-            "1 dispositivo → 45€\n"
-            "2 dispositivos → 75€\n"
-            "3 dispositivos → 100€\n"
-            "Más de 3 → Hablar con @manager_spidez",
+            "📌 <b>INFORMACIÓN DEL SERVICIO</b>\n\n"
+            "✅ Servicio estable 24/7\n"
+            "✅ Compatible con Smart TV, Fire TV, Android, iPhone, PC y más\n"
+            "✅ Deportes, eventos y contenido premium\n"
+            "✅ Soporte rápido\n\n"
+            "💰 <b>PRECIOS</b>\n\n"
+            "📺 1 dispositivo → 45€\n"
+            "📺 2 dispositivos → 75€\n"
+            "📺 3 dispositivos → 100€\n\n"
+            "Para más dispositivos contactar con soporte.",
             reply_markup=kb([
                 [InlineKeyboardButton("🔙 Volver atrás", callback_data="nuevo_cliente")]
             ])
         )
+
         return
 
+    # ---------------------------------------------------
+    # ADQUIRIR
+    # ---------------------------------------------------
+
     if data == "adquirir":
+
         bot.send_message(
             chat_id,
-            "🛒 <b>Elige dispositivos:</b>",
+            "🛒 <b>Selecciona el plan:</b>",
             reply_markup=kb([
                 [InlineKeyboardButton("1 dispositivo", callback_data="pagar_1")],
                 [InlineKeyboardButton("2 dispositivos", callback_data="pagar_2")],
                 [InlineKeyboardButton("3 dispositivos", callback_data="pagar_3")],
-                [InlineKeyboardButton("Más de 3", callback_data="pagar_mas_3")],
+                [InlineKeyboardButton("Más de 3 dispositivos", callback_data="pagar_mas_3")],
                 [InlineKeyboardButton("🔙 Volver atrás", callback_data="nuevo_cliente")]
             ])
         )
+
         return
 
+    # ---------------------------------------------------
+    # PLANES
+    # ---------------------------------------------------
+
+    if data.startswith("pagar_"):
+
+        plan = data.replace("pagar_", "")
+
+        update_user(chat_id, {
+            "plan": plan
+        })
+
+        bot.send_message(
+            chat_id,
+            "💳 <b>Selecciona método de pago:</b>",
+            reply_markup=kb([
+                [InlineKeyboardButton("💸 Bizum", callback_data="pago_bizum")],
+                [InlineKeyboardButton("💳 PayPal", callback_data="pago_paypal")],
+                [InlineKeyboardButton("🪙 Criptomonedas", callback_data="pago_crypto")],
+                [InlineKeyboardButton("🔙 Volver atrás", callback_data="adquirir")]
+            ])
+        )
+
+        return
+
+    # ---------------------------------------------------
+    # PAGOS
+    # ---------------------------------------------------
+
     if data.startswith("pago_"):
+
         metodo = data.replace("pago_", "")
 
+        user_data = get_user(chat_id)
+        plan = user_data.get("plan", "No especificado")
+
         notify_admin(
-            f"📩 Nuevo pago\n👤 {user_tag}\n💳 {metodo}"
+            "📩 <b>NUEVO PEDIDO</b>\n\n"
+            f"👤 Usuario: {user_tag}\n"
+            f"📺 Plan: {plan}\n"
+            f"💳 Pago: {metodo}"
         )
 
         bot.send_message(
             chat_id,
-            f"Perfecto 👍 te contactaremos por <b>{metodo}</b>.",
+            "✅ <b>Solicitud enviada correctamente</b>\n\n"
+            f"Método seleccionado: <b>{metodo}</b>\n\n"
+            "Spidez te contactará pronto para finalizar el pedido.",
             reply_markup=kb([
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="adquirir")]
+                [InlineKeyboardButton("🏠 Menú principal", callback_data="start_menu")]
             ])
         )
+
+        return
+
+    # ---------------------------------------------------
+    # AYUDA INSTALACIÓN
+    # ---------------------------------------------------
+
+    if data == "ayuda_instalacion":
+
+        notify_admin(
+            f"🆘 Solicitud ayuda instalación\n👤 {user_tag}"
+        )
+
+        bot.send_message(
+            chat_id,
+            "🆘 <b>Ayuda con instalación</b>\n\n"
+            "Pulsa abajo para hablar directamente con soporte.",
+            reply_markup=kb([
+                [InlineKeyboardButton("💬 Abrir soporte", url="https://t.me/manager_spidez")],
+                [InlineKeyboardButton("🔙 Volver atrás", callback_data="nuevo_cliente")]
+            ])
+        )
+
+        return
+
+    # ---------------------------------------------------
+    # PRUEBA GRATIS
+    # ---------------------------------------------------
+
+    if data == "prueba_gratis":
+
+        notify_admin(
+            f"🎁 Solicitud de prueba gratis\n👤 {user_tag}"
+        )
+
+        bot.send_message(
+            chat_id,
+            "🎁 <b>Solicitud enviada</b>\n\n"
+            "Spidez revisará tu solicitud y te contactará pronto.",
+            reply_markup=kb([
+                [InlineKeyboardButton("🏠 Menú principal", callback_data="start_menu")]
+            ])
+        )
+
+        return
+
+    # ---------------------------------------------------
+    # CLIENTE ANTIGUO
+    # ---------------------------------------------------
+
+    if data == "antiguo_cliente":
+
+        bot.send_message(
+            chat_id,
+            "👋 <b>Bienvenido de nuevo</b>\n\n"
+            "¿Qué necesitas?",
+            reply_markup=kb([
+                [InlineKeyboardButton("🔄 Renovar servicio", callback_data="renovar")],
+                [InlineKeyboardButton("⚠️ Tengo problemas", callback_data="problema_enlace")],
+                [InlineKeyboardButton("💬 Hablar con Spidez", url="https://t.me/manager_spidez")],
+                [InlineKeyboardButton("🔙 Volver atrás", callback_data="start_menu")]
+            ])
+        )
+
+        return
+
+    # ---------------------------------------------------
+    # RENOVAR
+    # ---------------------------------------------------
+
+    if data == "renovar":
+
+        notify_admin(
+            f"🔄 Solicitud renovación\n👤 {user_tag}"
+        )
+
+        bot.send_message(
+            chat_id,
+            "🔄 <b>Solicitud enviada</b>\n\n"
+            "Spidez te contactará pronto para renovar tu servicio.",
+            reply_markup=kb([
+                [InlineKeyboardButton("🏠 Menú principal", callback_data="start_menu")]
+            ])
+        )
+
+        return
+
+    # ---------------------------------------------------
+    # PROBLEMAS
+    # ---------------------------------------------------
+
+    if data == "problema_enlace":
+
+        notify_admin(
+            f"⚠️ Problema reportado\n👤 {user_tag}"
+        )
+
+        bot.send_message(
+            chat_id,
+            "⚠️ <b>Incidencia enviada</b>\n\n"
+            "Nuestro soporte revisará tu problema lo antes posible.",
+            reply_markup=kb([
+                [InlineKeyboardButton("💬 Hablar con soporte", url="https://t.me/manager_spidez")],
+                [InlineKeyboardButton("🏠 Menú principal", callback_data="start_menu")]
+            ])
+        )
+
         return
 
 # ---------------------------------------------------
-# START BOT
+# INICIAR BOT
 # ---------------------------------------------------
 
+print("BOT INICIADO")
+
 bot.delete_webhook()
-bot.infinity_polling()
+bot.infinity_polling(skip_pending=True)
