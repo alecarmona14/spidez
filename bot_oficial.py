@@ -3,6 +3,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import datetime
 import json
 import os
+import re
 
 # ---------------------------------------------------
 # CONFIGURACIÓN
@@ -213,13 +214,16 @@ def callbacks(call):
         return
 
     # -----------------------------------------------
-    # PROBLEMA CON ENLACE (SIN PISTAS)
+    # PROBLEMA CON ENLACE (MODIFICADO)
     # -----------------------------------------------
     if data == "problema_enlace":
         update_user(chat_id, {"esperando_usuario": True})
         bot.send_message(
             chat_id,
-            "Escribe tu usuario para verificarlo.",
+            "Escribe tu usuario para verificarlo.\n\n"
+            "ℹ <b>Ayuda:</b>\n"
+            "Tu usuario está en el enlace del chat con @manager_spidez.\n"
+            "Es lo que aparece después de <b>username=</b> y antes de <b>&</b>.",
             reply_markup=kb([
                 [InlineKeyboardButton("❓ No sé cuál es mi usuario", callback_data="no_se_usuario")],
                 [InlineKeyboardButton("🔙 Volver atrás", callback_data="antiguo_cliente")]
@@ -346,15 +350,32 @@ def verificar_usuario(message):
     user_data = get_user(chat_id)
 
     # -------------------------------------------
-    # VERIFICAR USUARIO (SIN PISTAS)
+    # VERIFICAR USUARIO (MODIFICADO)
     # -------------------------------------------
     if user_data.get("esperando_usuario"):
 
+        usuario = texto.strip()
         update_user(chat_id, {"esperando_usuario": False})
+
+        # Verificar patrón alec + números
+        if not re.fullmatch(r"alec\d+", usuario):
+            bot.send_message(
+                chat_id,
+                "❌ <b>Error:</b> Ese usuario no es válido.\n"
+                "Debe ser algo como <b>alec123</b>."
+            )
+
+            notify_admin(
+                f"⚠️ Usuario INCORRECTO enviado por cliente\n"
+                f"👤 @{message.from_user.username}\n"
+                f"🆔 {chat_id}\n"
+                f"❗ Usuario escrito: {usuario}"
+            )
+            return
 
         bot.send_message(
             chat_id,
-            "Perfecto, tu usuario está verificado.\n\n"
+            f"✅ Tu usuario <b>{usuario}</b> está verificado.\n\n"
             "Aquí tienes un ejemplo para comparar tu enlace:\n\n"
             "🔗 <code>http://m6sd6cgy.okfkte.xyz:80/xmltv.php?username=<b>usuario123</b>&password=Jk92LmQ8R</code>\n\n"
             "📌 <b>IMPORTANTE</b>\n"
