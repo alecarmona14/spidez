@@ -66,12 +66,14 @@ def notify_admin(text):
 @bot.message_handler(commands=['start'])
 def start(message):
     chat_id = message.chat.id
+    update_user(chat_id, {"esperando_usuario": False})
     bot.send_message(
         chat_id,
         "👋 <b>Bienvenido</b>\n\n¿Eres un cliente nuevo o ya eres cliente?",
         reply_markup=kb([
             [InlineKeyboardButton("🆕 Nuevo cliente", callback_data="nuevo_cliente")],
-            [InlineKeyboardButton("👤 Ya soy cliente", callback_data="antiguo_cliente")]
+            [InlineKeyboardButton("👤 Ya soy cliente", callback_data="antiguo_cliente")],
+            [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
         ])
     )
 
@@ -90,6 +92,7 @@ def callbacks(call):
     # VOLVER AL MENÚ PRINCIPAL
     # -----------------------------------------------
     if data == "start_menu":
+        update_user(chat_id, {"esperando_usuario": False})
         start(call.message)
         return
 
@@ -106,7 +109,7 @@ def callbacks(call):
                 [InlineKeyboardButton("🆘 Ayuda con la instalación", callback_data="ayuda_instalacion")],
                 [InlineKeyboardButton("🎁 Quiero prueba gratis", callback_data="prueba_gratis")],
                 [InlineKeyboardButton("💬 Hablar con Spidez", url="https://t.me/manager_spidez")],
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="start_menu")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
@@ -122,7 +125,7 @@ def callbacks(call):
                 [InlineKeyboardButton("🔄 Renovar", callback_data="renovar")],
                 [InlineKeyboardButton("⚠️ Tengo problemas con mi enlace", callback_data="problema_enlace")],
                 [InlineKeyboardButton("💬 Hablar con Spidez", url="https://t.me/manager_spidez")],
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="start_menu")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
@@ -143,7 +146,7 @@ def callbacks(call):
             "3 dispositivos → 100€\n"
             "Más de 3 → Hablar con @manager_spidez",
             reply_markup=kb([
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="nuevo_cliente")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
@@ -157,10 +160,10 @@ def callbacks(call):
             "🛒 <b>Elige cuántos dispositivos quieres adquirir:</b>",
             reply_markup=kb([
                 [InlineKeyboardButton("1 dispositivo", callback_data="pagar_1")],
-                [InlineKeyboardButton("2 dispositivos",callback_data="pagar_2")],
-                [InlineKeyboardButton("3 dispositivos",callback_data="pagar_3")],
+                [InlineKeyboardButton("2 dispositivos", callback_data="pagar_2")],
+                [InlineKeyboardButton("3 dispositivos", callback_data="pagar_3")],
                 [InlineKeyboardButton("Más de 3", callback_data="pagar_mas_3")],
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="nuevo_cliente")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
@@ -176,7 +179,7 @@ def callbacks(call):
             "🆘 <b>Ayuda con la instalación</b>\n\nHabla con un asistente:",
             reply_markup=kb([
                 [InlineKeyboardButton("👤 Hablar con Spidez", url="https://t.me/manager_spidez")],
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="nuevo_cliente")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
@@ -191,7 +194,7 @@ def callbacks(call):
             chat_id,
             "🎁 <b>Prueba gratis solicitada</b>\n\nUn asistente te contactará en breve.",
             reply_markup=kb([
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="nuevo_cliente")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
@@ -207,14 +210,13 @@ def callbacks(call):
                 [InlineKeyboardButton("1 dispositivo", callback_data="pagar_1")],
                 [InlineKeyboardButton("2 dispositivos", callback_data="pagar_2")],
                 [InlineKeyboardButton("3 dispositivos", callback_data="pagar_3")],
-                [InlineKeyboardButton("Más de 3", callback_data="pagar_mas_3")],
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="antiguo_cliente")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
 
     # -----------------------------------------------
-    # PROBLEMA CON ENLACE (MODIFICADO)
+    # PROBLEMA CON ENLACE
     # -----------------------------------------------
     if data == "problema_enlace":
         update_user(chat_id, {"esperando_usuario": True})
@@ -226,13 +228,13 @@ def callbacks(call):
             "Es lo que aparece después de <b>username=</b> y antes de <b>&</b>.",
             reply_markup=kb([
                 [InlineKeyboardButton("❓ No sé cuál es mi usuario", callback_data="no_se_usuario")],
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="antiguo_cliente")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
 
     # -----------------------------------------------
-    # NO SÉ MI USUARIO (MODIFICADO)
+    # NO SÉ MI USUARIO
     # -----------------------------------------------
     if data == "no_se_usuario":
         bot.send_message(
@@ -245,8 +247,7 @@ def callbacks(call):
             "• <b>Contraseña:</b> lo que aparece después de <b>password=</b>\n\n"
             "Para ver tu usuario real, revisa tu conversación con Spidez.",
             reply_markup=kb([
-                [InlineKeyboardButton("💬 Abrir conversación con Spidez", url="https://t.me/manager_spidez")],
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="problema_enlace")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
@@ -264,7 +265,7 @@ def callbacks(call):
             "Para más de 3 dispositivos, debes hablar con un asistente:",
             reply_markup=kb([
                 [InlineKeyboardButton("👤 Hablar con Spidez", url="https://t.me/manager_spidez")],
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="adquirir")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
@@ -286,7 +287,7 @@ def callbacks(call):
                 [InlineKeyboardButton("🪙 Crypto", callback_data="pago_crypto")],
                 [InlineKeyboardButton("🎟 Paysafecard", callback_data="pago_paysafecard")],
                 [InlineKeyboardButton("💸 PayPal", callback_data="pago_paypal")],
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="adquirir")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
@@ -315,31 +316,17 @@ def callbacks(call):
             f"📅 Fecha: {fecha_actual}"
         )
 
-        if metodo == "paypal":
-            bot.send_message(
-                chat_id,
-                "⚠️ <b>IMPORTANTE ANTES DE PAGAR</b>\n\n"
-                "• Paga como <b>Amigos y Familiares</b>\n"
-                "• <b>No pongas concepto</b>\n\n"
-                "Cuando estés listo, pulsa el botón:",
-                reply_markup=kb([
-                    [InlineKeyboardButton("💸 Ir a PayPal", url="https://paypal.me/alexgslam")],
-                    [InlineKeyboardButton("🔙 Volver atrás", callback_data="adquirir")]
-                ])
-            )
-            return
-
         bot.send_message(
             chat_id,
             f"Perfecto, un asistente te contactará para completar el pago por <b>{metodo.capitalize()}</b>.",
             reply_markup=kb([
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="adquirir")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
 
 # ---------------------------------------------------
-# HANDLER DE MENSAJES (SOLO USUARIO)
+# HANDLER DE MENSAJES (VERIFICACIÓN DE USUARIO)
 # ---------------------------------------------------
 
 @bot.message_handler(func=lambda m: True)
@@ -350,12 +337,11 @@ def verificar_usuario(message):
     user_data = get_user(chat_id)
 
     # -------------------------------------------
-    # VERIFICAR USUARIO (MODIFICADO FINAL)
+    # VERIFICAR USUARIO (NO VUELVE A /START)
     # -------------------------------------------
     if user_data.get("esperando_usuario"):
 
         usuario = texto.strip()
-        update_user(chat_id, {"esperando_usuario": False})
 
         # Verificar patrón alec + números
         if not re.fullmatch(r"alec\d+", usuario):
@@ -365,7 +351,7 @@ def verificar_usuario(message):
                 "❌ <b>Ese usuario no es válido.</b>",
                 reply_markup=kb([
                     [InlineKeyboardButton("❓ No sé cuál es mi usuario", callback_data="no_se_usuario")],
-                    [InlineKeyboardButton("🔙 Volver atrás", callback_data="antiguo_cliente")]
+                    [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
                 ])
             )
 
@@ -375,9 +361,14 @@ def verificar_usuario(message):
                 f"🆔 {chat_id}\n"
                 f"❗ Usuario escrito: {usuario}"
             )
+
+            # SEGUIR ESPERANDO USUARIO
+            update_user(chat_id, {"esperando_usuario": True})
             return
 
-        # Usuario válido
+        # Usuario válido → cerrar modo
+        update_user(chat_id, {"esperando_usuario": False})
+
         bot.send_message(
             chat_id,
             f"✅ Tu usuario <b>{usuario}</b> está verificado.\n\n"
@@ -387,7 +378,7 @@ def verificar_usuario(message):
             "Debes cambiar el dominio de tu enlace y usar SIEMPRE <b>okfkte</b>.\n"
             "Solo cambia el dominio, deja tu usuario y contraseña tal como los tienes.",
             reply_markup=kb([
-                [InlineKeyboardButton("🔙 Volver atrás", callback_data="antiguo_cliente")]
+                [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
             ])
         )
         return
