@@ -157,8 +157,8 @@ def callbacks(call):
             "🛒 <b>Elige cuántos dispositivos quieres adquirir:</b>",
             reply_markup=kb([
                 [InlineKeyboardButton("1 dispositivo", callback_data="pagar_1")],
-                [InlineKeyboardButton("2 dispositivos", callback_data="pagar_2")],
-                [InlineKeyboardButton("3 dispositivos", callback_data="pagar_3")],
+                [InlineKeyboardButton("2 dispositivos",callback_data="pagar_2")],
+                [InlineKeyboardButton("3 dispositivos",callback_data="pagar_3")],
                 [InlineKeyboardButton("Más de 3", callback_data="pagar_mas_3")],
                 [InlineKeyboardButton("🔙 Volver atrás", callback_data="nuevo_cliente")]
             ])
@@ -232,17 +232,17 @@ def callbacks(call):
         return
 
     # -----------------------------------------------
-    # NO SÉ MI USUARIO
+    # NO SÉ MI USUARIO (MODIFICADO)
     # -----------------------------------------------
     if data == "no_se_usuario":
         bot.send_message(
             chat_id,
             "Aquí tienes un ejemplo real:\n\n"
-            "🔗 <code>http://m6sd6cgy.okfkte.xyz:80/xmltv.php?username=<b>usuario123</b>&password=Jk92LmQ8R</code>\n\n"
+            "🔗 <code>http://dominio.<b>cambio</b>.xyz:80/xmltv.php?username=<b>usuario123</b>&password=Jk92LmQ8R</code>\n\n"
             "📌 <b>Explicación:</b>\n"
-            "• <b>usuario123</b> → es el usuario (lo que aparece entre <b>username=</b> y <b>&password</b>)\n"
-            "• <b>Jk92LmQ8R</b> → es la contraseña\n"
-            "• <b>http://m6sd6cgy.okfkte.xyz:80</b> → es el dominio\n\n"
+            "• <b>Dominio:</b> desde el inicio hasta <b>:80</b>\n"
+            "• <b>Usuario:</b> lo que aparece después de <b>username=</b> y antes de <b>&</b>\n"
+            "• <b>Contraseña:</b> lo que aparece después de <b>password=</b>\n\n"
             "Para ver tu usuario real, revisa tu conversación con Spidez.",
             reply_markup=kb([
                 [InlineKeyboardButton("💬 Abrir conversación con Spidez", url="https://t.me/manager_spidez")],
@@ -350,7 +350,7 @@ def verificar_usuario(message):
     user_data = get_user(chat_id)
 
     # -------------------------------------------
-    # VERIFICAR USUARIO (MODIFICADO)
+    # VERIFICAR USUARIO (MODIFICADO FINAL)
     # -------------------------------------------
     if user_data.get("esperando_usuario"):
 
@@ -359,10 +359,14 @@ def verificar_usuario(message):
 
         # Verificar patrón alec + números
         if not re.fullmatch(r"alec\d+", usuario):
+
             bot.send_message(
                 chat_id,
-                "❌ <b>Error:</b> Ese usuario no es válido.\n"
-                "Debe ser algo como <b>alec123</b>."
+                "❌ <b>Ese usuario no es válido.</b>",
+                reply_markup=kb([
+                    [InlineKeyboardButton("❓ No sé cuál es mi usuario", callback_data="no_se_usuario")],
+                    [InlineKeyboardButton("🔙 Volver atrás", callback_data="antiguo_cliente")]
+                ])
             )
 
             notify_admin(
@@ -373,14 +377,15 @@ def verificar_usuario(message):
             )
             return
 
+        # Usuario válido
         bot.send_message(
             chat_id,
             f"✅ Tu usuario <b>{usuario}</b> está verificado.\n\n"
             "Aquí tienes un ejemplo para comparar tu enlace:\n\n"
-            "🔗 <code>http://m6sd6cgy.okfkte.xyz:80/xmltv.php?username=<b>usuario123</b>&password=Jk92LmQ8R</code>\n\n"
+            "🔗 <code>http://dominio.<b>cambio</b>.xyz:80/xmltv.php?username=<b>usuario123</b>&password=Jk92LmQ8R</code>\n\n"
             "📌 <b>IMPORTANTE</b>\n"
-            "Debes usar SIEMPRE el dominio <b>okfkte</b>.\n"
-            "Borra el dominio que tengas y pon este.",
+            "Debes cambiar el dominio de tu enlace y usar SIEMPRE <b>okfkte</b>.\n"
+            "Solo cambia el dominio, deja tu usuario y contraseña tal como los tienes.",
             reply_markup=kb([
                 [InlineKeyboardButton("🔙 Volver atrás", callback_data="antiguo_cliente")]
             ])
