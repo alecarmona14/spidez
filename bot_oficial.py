@@ -375,7 +375,7 @@ def verificar_usuario(message):
             "Aquí tienes un ejemplo para comparar tu enlace:\n\n"
             "🔗 <code>http://dominio.<b>cambio</b>.xyz:80/xmltv.php?username=<b>usuario123</b>&password=Jk92LmQ8R</code>\n\n"
             "📌 <b>IMPORTANTE</b>\n"
-            "Debes cambiar el dominio de tu enlace y usar SIEMPRE <b>okfkte</b>.\n"
+            "Debes cambiar el dominio de tu enlace y usar SIEMPRE <b>okbwd</b>.\n"
             "Solo cambia el dominio, deja tu usuario y contraseña tal como los tienes.",
             reply_markup=kb([
                 [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
