@@ -341,7 +341,7 @@ def verificar_usuario(message):
     # -------------------------------------------
     if user_data.get("esperando_usuario"):
 
-        usuario = texto.strip()
+        usuario = texto.strip().lower()
 
         # Verificar patrón alec + números
         if not re.fullmatch(r"alec\d+", usuario):
