@@ -225,7 +225,7 @@ def callbacks(call):
             "Escribe tu usuario para verificarlo.\n\n"
             "ℹ <b>Ayuda:</b>\n"
             "Tu usuario está en el enlace del chat con @manager_spidez.\n"
-            "Es lo que aparece después de <b>username=</b> y antes de <b>&</b>.",
+            "Es lo que aparece después de <b>username=</b> y antes de <b>&(La primera en MINUSCULA)</b>.",
             reply_markup=kb([
                 [InlineKeyboardButton("❓ No sé cuál es mi usuario", callback_data="no_se_usuario")],
                 [InlineKeyboardButton("🔄 Empezar de nuevo", callback_data="start_menu")]
